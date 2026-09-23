@@ -1,0 +1,41 @@
+{
+  "name": "kamal-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "prisma generate && next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "test:kamals": "node --conditions=react-server --import tsx --import ./tests/register-loader.mjs --test tests/kamals.test.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.1.0",
+    "next": "16.3.6",
+    "pg": "^8.23.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/node": "^24.5.2",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.36.0",
+    "eslint-config-next": "16.3.6",
+    "postcss": "^8.5.6",
+    "prisma": "^7.10.0",
+    "tailwindcss": "^4.1.13",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

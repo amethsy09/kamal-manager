@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+enum KamalStatus {
+  BROUILLON
+  EN_COURS
+  TERMINE
+  EXPIRE
+}
+
+enum AssignmentStatus {
+  EN_ATTENTE
+  CONFIRME
+  REASSIGNE
+  ANNULE
+}
+
+model User {
+  id           String       @id @default(uuid())
+  nom          String
+  prenom       String
+  telephone    String       @unique
+  passwordHash String?
+  role         UserRole     @default(MEMBER)
+  actif        Boolean      @default(true)
+  assignments  Assignment[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([role])
+  @@index([actif])
+}
+
+model Kamal {
+  id            String       @id @default(uuid())
+  titre         String
+  dateCreation  DateTime     @default(now())
+  dateLimite    DateTime?
+  statut        KamalStatus  @default(BROUILLON)
+  archivedAt    DateTime?
+  assignments   Assignment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([statut])
+  @@index([dateLimite])
+  @@index([archivedAt])
+}
+
+model Assignment {
+  id            String           @id @default(uuid())
+  kamalId       String
+  userId        String
+  juzNumber     Int
+  tokenAcces    String           @unique
+  statut        AssignmentStatus @default(EN_ATTENTE)
+  confirmedAt   DateTime?
+  confirmedBy   UserRole?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  kamal         Kamal            @relation(fields: [kamalId], references: [id], onDelete: Cascade)
+  user          User             @relation(fields: [userId], references: [id])
+
+  @@index([kamalId])
+  @@index([userId])
+  @@index([statut])
+}

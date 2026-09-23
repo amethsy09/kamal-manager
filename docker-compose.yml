@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: kamal-manager-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: kamal_manager
+      POSTGRES_USER: kamal
+      POSTGRES_PASSWORD: kamal
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - kamal_pgdata:/var/lib/postgresql
+
+volumes:
+  kamal_pgdata:
