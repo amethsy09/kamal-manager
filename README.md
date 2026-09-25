@@ -41,7 +41,7 @@ npm run dev
 
 Compte admin de démonstration :
 
-- Téléphone : `+221770000000`
+- Téléphone : `785234420`
 - Mot de passe : `ChangeMe123!`
 
 **À changer immédiatement en environnement réel.**
