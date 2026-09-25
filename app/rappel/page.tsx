@@ -1,0 +1,3 @@
+export default function ReminderPage() {
+  return <main className="grid min-h-screen place-items-center bg-slate-50 p-5"><section className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-sm"><p className="text-sm font-bold text-emerald-700">Kaamil Dahira FWK</p><h1 className="mt-5 text-2xl font-bold text-slate-950">Rappel du Kammil mensuel</h1><p className="mt-3 text-sm leading-6 text-slate-600">Pense à effectuer tes deux lectures pour chaque Jukki qui t’a été attribué. Ouvre le lien d’affectation reçu par WhatsApp pour confirmer tes lectures.</p></section></main>;
+}

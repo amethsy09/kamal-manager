@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { notifyKamalMembers } from "@/lib/push-notifications";
 import { requireAdmin } from "@/lib/auth";
 import { planJuzAssignments } from "@/lib/kamal-assignments";
 import { archiveKamal as archiveKamalRecord, confirmJuzAsAdmin, reassignPendingJuz, restoreKamal as restoreKamalRecord } from "@/lib/kamal-operations";
@@ -91,6 +92,7 @@ export async function createKamal(formData: FormData) {
     await tx.assignment.createMany({ data: planJuzAssignments(item.id, members, parsed.data.mode) });
     return item;
   });
+  await notifyKamalMembers(kamal.id);
   revalidatePath("/admin/dashboard");
   redirect(`/admin/kamals/${kamal.id}`);
 }

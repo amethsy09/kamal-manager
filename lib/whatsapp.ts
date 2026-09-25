@@ -3,7 +3,7 @@ export function whatsappShareUrl(message: string) {
 }
 
 export function participantMessage(args: { prenom: string; kamal: string; juz: number; url: string }) {
-  return `Assalamou alaykoum ${args.prenom} 👋\n\nTon Juz pour le ${args.kamal} :\n\n📖 Juz ${args.juz}\n\nQuand tu as terminé ta lecture, confirme ici :\n${args.url}\n\nQu'Allah accepte ta lecture 🤲`;
+  return `Assalamou alaykoum ${args.prenom} 👋\n\nTon Jukki pour le ${args.kamal} :\n\n📖 Jukki ${args.juz}\n\nQuand tu as terminé ta lecture, confirme ici :\n${args.url}\n\nQu'Allah accepte ta lecture 🤲`;
 }
 
 

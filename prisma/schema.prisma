@@ -35,6 +35,8 @@ model User {
   role         UserRole     @default(MEMBER)
   actif        Boolean      @default(true)
   assignments  Assignment[]
+  pushSubscriptions PushSubscription[]
+  pushReminderLogs PushReminderLog[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -77,4 +79,30 @@ model Assignment {
   @@index([kamalId])
   @@index([userId])
   @@index([statut])
+}
+
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PushReminderLog {
+  id           String   @id @default(uuid())
+  userId       String
+  reminderKey  String
+  sentAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reminderKey])
 }
