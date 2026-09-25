@@ -65,6 +65,7 @@ model Assignment {
   juzNumber     Int
   tokenAcces    String           @unique
   statut        AssignmentStatus @default(EN_ATTENTE)
+  lectureCount  Int              @default(0)
   confirmedAt   DateTime?
   confirmedBy   UserRole?
   createdAt     DateTime         @default(now())

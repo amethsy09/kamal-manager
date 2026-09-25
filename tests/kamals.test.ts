@@ -52,11 +52,16 @@ test("Kamal listing filters, admin and participant confirmation, and reassignmen
     assert.equal(listed.length, 1, "status and title filters should find only the fixture Kamal");
     assert.equal(listed[0].assignments.length, 30, "new Kamal should contain all 30 active Juz");
 
-    const adminConfirmed = await confirmJuzAsAdmin(assignments[0].id);
+    const adminFirstReading = await confirmJuzAsAdmin(assignments[0].id);
+    const adminSecondReading = await confirmJuzAsAdmin(assignments[0].id);
     const adminRepeat = await confirmJuzAsAdmin(assignments[0].id);
-    assert.equal(adminConfirmed.count, 1);
-    assert.equal(adminRepeat.count, 0, "manual confirmation should be idempotent");
+    assert.equal(adminFirstReading.lectureCount, 1);
+    assert.equal(adminFirstReading.completed, false, "the first reading should leave the Juz pending");
+    assert.equal(adminSecondReading.lectureCount, 2);
+    assert.equal(adminSecondReading.completed, true, "the second reading should complete the Juz");
+    assert.equal(adminRepeat.count, 0, "confirmation after completion should be idempotent");
     const adminRow = await prisma.assignment.findUniqueOrThrow({ where: { id: assignments[0].id } });
+    assert.equal(adminRow.lectureCount, 2);
     assert.equal(adminRow.confirmedBy, "ADMIN");
     assert.ok(adminRow.confirmedAt);
 
@@ -64,10 +69,15 @@ test("Kamal listing filters, admin and participant confirmation, and reassignmen
     const participantContext = { params: Promise.resolve({ token: participantToken }) };
     const firstResponse = await confirmParticipant(new Request("http://localhost/api/participant/confirm", { method: "POST" }), participantContext);
     const secondResponse = await confirmParticipant(new Request("http://localhost/api/participant/confirm", { method: "POST" }), participantContext);
+    const thirdResponse = await confirmParticipant(new Request("http://localhost/api/participant/confirm", { method: "POST" }), participantContext);
     assert.equal(firstResponse.status, 200);
+    assert.deepEqual(await firstResponse.json(), { ok: true, lectureCount: 1, completed: false, alreadyCompleted: false });
     assert.equal(secondResponse.status, 200);
-    assert.equal((await secondResponse.json()).alreadyConfirmed, true);
+    assert.deepEqual(await secondResponse.json(), { ok: true, lectureCount: 2, completed: true, alreadyCompleted: false });
+    assert.equal(thirdResponse.status, 200);
+    assert.equal((await thirdResponse.json()).alreadyCompleted, true);
     const participantRow = await prisma.assignment.findUniqueOrThrow({ where: { id: assignments[1].id } });
+    assert.equal(participantRow.lectureCount, 2);
     assert.equal(participantRow.confirmedBy, "MEMBER");
 
     const oldToken = drafts[2].tokenAcces;

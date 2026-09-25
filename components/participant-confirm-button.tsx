@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export function ParticipantConfirmButton({ token }: { token: string }) {
+export function ParticipantConfirmButton({ token, lectureCount }: { token: string; lectureCount: number }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   async function confirm() {
@@ -11,5 +11,5 @@ export function ParticipantConfirmButton({ token }: { token: string }) {
     else window.location.reload();
     setLoading(false);
   }
-  return <div className="mt-6"><button onClick={confirm} disabled={loading} className="w-full rounded-2xl bg-emerald-700 px-5 py-4 text-lg font-bold text-white shadow-sm disabled:opacity-50">{loading ? "Confirmation..." : "✓ J'ai terminé ma lecture"}</button>{error && <p className="mt-3 text-center text-sm text-red-600">{error}</p>}</div>;
+  return <div className="mt-6"><button onClick={confirm} disabled={loading} className="w-full rounded-2xl bg-emerald-700 px-5 py-4 text-lg font-bold text-white shadow-sm disabled:opacity-50">{loading ? "Confirmation..." : `✓ J'ai terminé ma ${lectureCount === 0 ? "1re" : "2e"} lecture`}</button>{error && <p className="mt-3 text-center text-sm text-red-600">{error}</p>}</div>;
 }

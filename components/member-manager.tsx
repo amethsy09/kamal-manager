@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { archiveMember, createMember, deleteMember, restoreMember, updateMember } from "@/lib/admin-actions";
+import { whatsappRecipientUrl } from "@/lib/whatsapp";
 
 type Member = { id: string; prenom: string; nom: string; telephone: string; actif: boolean };
 type Notice = { kind: "success" | "error"; message: string } | null;
@@ -10,6 +11,34 @@ export function MemberManager({ members, notice }: { members: Member[]; notice: 
   const [selectedId, setSelectedId] = useState("");
   const selected = useMemo(() => members.find((member) => member.id === selectedId), [members, selectedId]);
   const action = selected ? updateMember : createMember;
+  const activeMembers = members.filter((member) => member.actif);
+  const [bulkMessage, setBulkMessage] = useState("Assalamou alaykoum {prenom} 👋\n\nNous vous contactons au sujet de notre Dahira.\n\nQu'Allah vous bénisse 🤲");
+  const [bulkIndex, setBulkIndex] = useState(-1);
+  const [bulkNotice, setBulkNotice] = useState("");
+
+  function openBulkMember(index: number) {
+    const member = activeMembers[index];
+    if (!member) return;
+    const url = whatsappRecipientUrl(member.telephone, bulkMessage.replaceAll("{prenom}", member.prenom));
+    if (!url) {
+      setBulkIndex(index + 1);
+      setBulkNotice(`Numéro invalide pour ${member.prenom} ${member.nom}, membre ignoré.`);
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+    setBulkIndex(index);
+    setBulkNotice(`Conversation ouverte pour ${member.prenom} ${member.nom}. Envoie le message dans WhatsApp, puis passe au suivant.`);
+  }
+
+  function openNextBulkMember() {
+    const next = bulkIndex + 1;
+    if (next >= activeMembers.length) {
+      setBulkIndex(activeMembers.length);
+      setBulkNotice("Tous les membres actifs ont été traités.");
+      return;
+    }
+    openBulkMember(next);
+  }
 
   return <div className="grid items-start gap-6 xl:grid-cols-[minmax(19rem,.8fr)_minmax(0,1.2fr)]">
     <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
@@ -25,6 +54,14 @@ export function MemberManager({ members, notice }: { members: Member[]; notice: 
         <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap"><button className="min-h-11 flex-1 rounded-xl bg-emerald-800 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900">{selected ? "Enregistrer les modifications" : "Ajouter le membre"}</button>{selected && <><button formAction={selected.actif ? archiveMember : restoreMember} formNoValidate className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">{selected.actif ? "Archiver" : "Restaurer"}</button><button formAction={deleteMember} formNoValidate className="min-h-11 rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50" onClick={(event) => { if (!window.confirm(`Supprimer ${selected.prenom} ${selected.nom} ?`)) event.preventDefault(); }}>Supprimer</button></>}</div>
         {selected && <p className="text-xs leading-5 text-slate-400">Archiver retire le membre des prochaines affectations sans effacer son historique. Supprimer l’archive automatiquement si des affectations existent.</p>}
       </form>
+    </section>
+
+    <section className="xl:col-start-2 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:p-5">
+      <div><h2 className="font-semibold text-emerald-950">Message WhatsApp groupé</h2><p className="mt-1 text-sm leading-5 text-emerald-900/70">Prépare un message pour les {activeMembers.length} membres actifs. Utilise <code className="rounded bg-white/70 px-1">{`{prenom}`}</code> pour personnaliser le prénom.</p></div>
+      <textarea value={bulkMessage} onChange={(event) => setBulkMessage(event.target.value)} rows={4} aria-label="Message WhatsApp à envoyer aux membres actifs" className="mt-3 w-full rounded-xl border border-emerald-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+      <div className="mt-3 flex flex-wrap items-center gap-2"><button type="button" disabled={!activeMembers.length || !bulkMessage.trim()} onClick={() => openBulkMember(0)} className="min-h-10 rounded-xl bg-[#25D366] px-4 text-sm font-semibold text-white transition hover:bg-[#1fb85a] disabled:cursor-not-allowed disabled:opacity-50">{bulkIndex >= 0 && bulkIndex < activeMembers.length ? "Recommencer" : "Ouvrir le premier WhatsApp"}</button>{bulkIndex >= 0 && bulkIndex < activeMembers.length && <button type="button" onClick={openNextBulkMember} className="min-h-10 rounded-xl border border-emerald-200 bg-white px-4 text-sm font-semibold text-emerald-900 hover:bg-emerald-50">Message envoyé · suivant</button>}{bulkIndex >= activeMembers.length && activeMembers.length > 0 && <button type="button" onClick={() => { setBulkIndex(-1); setBulkNotice(""); }} className="min-h-10 rounded-xl border border-emerald-200 bg-white px-4 text-sm font-semibold text-emerald-900 hover:bg-emerald-50">Nouvel envoi</button>}</div>
+      {bulkNotice && <p role="status" className="mt-3 text-xs leading-5 text-emerald-900">{bulkNotice}</p>}
+      <p className="mt-2 text-xs leading-5 text-emerald-900/60">WhatsApp demande de confirmer chaque envoi. Les membres archivés ne sont pas inclus.</p>
     </section>
 
     <section><div className="mb-3 flex items-center justify-between"><h2 className="font-semibold text-slate-900">Liste des membres</h2><span className="text-xs text-slate-400">{members.length} au total</span></div><div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">{members.length ? <div className="divide-y divide-slate-100">{members.map((member) => <button type="button" key={member.id} onClick={() => setSelectedId(member.id)} aria-pressed={selectedId === member.id} className={`flex w-full items-center gap-3 p-4 text-left transition hover:bg-slate-50 sm:px-5 ${selectedId === member.id ? "bg-emerald-50/60" : ""}`}><span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full text-sm font-bold uppercase ${member.actif ? "bg-emerald-50 text-emerald-800" : "bg-slate-100 text-slate-500"}`}>{member.prenom.slice(0, 1)}{member.nom.slice(0, 1)}</span><span className="min-w-0 flex-1"><span className="block truncate font-semibold text-slate-900">{member.prenom} {member.nom}</span><span className="mt-0.5 block text-sm text-slate-500">{member.telephone}</span></span><span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${member.actif ? "bg-emerald-50 text-emerald-800" : "bg-slate-100 text-slate-500"}`}>{member.actif ? "Actif" : "Archivé"}</span><span className="ml-1 text-slate-300" aria-hidden="true">›</span></button>)}</div> : <div className="px-6 py-14 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-500">♧</span><h3 className="mt-4 font-semibold text-slate-900">La liste est encore vide</h3><p className="mt-1 text-sm text-slate-500">Ajoutez une personne avec le formulaire pour commencer.</p></div>}</div></section>
