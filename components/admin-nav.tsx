@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { logoutAdmin } from "@/lib/auth";
 import { AdminNavLinks } from "@/components/admin-nav-links";
 
@@ -10,8 +11,8 @@ export async function AdminNav() {
 
   return <div className="flex h-full min-h-0 flex-col px-5 py-6">
     <Link href="/admin/dashboard" className="sidebar-brand flex items-center gap-3 px-2">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-800 text-white shadow-sm"><svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m-7-8h14M5 5l14 14M19 5 5 19" /></svg></span>
-      <span className="sidebar-label"><span className="block text-sm font-black tracking-wide text-slate-900">KAMAL</span><span className="block text-xs font-medium tracking-[.18em] text-emerald-700">MANAGER</span></span>
+      <Image src="/kaamil-dahira-logo.jpeg" alt="Logo Kaamil Dahira FWK" width={44} height={44} className="h-11 w-11 shrink-0 rounded-2xl object-contain" />
+      <span className="sidebar-label"><span className="block text-sm font-black tracking-wide text-slate-900">kaamil</span><span className="block text-xs font-medium tracking-[.18em] text-emerald-700">Dahira FWK</span></span>
     </Link>
     <div className="sidebar-label mt-10 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">Espace responsable</div>
     <div className="mt-3"><AdminNavLinks /></div>
